@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>同人Tag关系查询系统</title>
+    <style>
+        /* 密码界面样式 */
+        .password-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+        
+        .password-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .password-container h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .password-input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .password-error {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+        
+        .password-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .password-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 主内容初始隐藏 */
+        .main-content {
+            display: none;
+        }
+        
+        /* 原有样式保持不变 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #searchInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        #searchInput:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #666;
+            border-left: 4px solid #667eea;
+        }
+        
+        .results-section {
+            padding: 30px;
+        }
+        
+        .result-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .result-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .combo-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .codes {
+            font-size: 1.1rem;
+            color: #34495e;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .codes .highlight {
+            background-color: #ffeaa7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .remark {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-style: italic;
+            color: #666;
+            border-left: 3px solid #95a5a6;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px 20px;
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        
+        .status-bar {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+            margin: 25px 0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #95a5a6;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .password-container {
+                padding: 30px 20px;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 密码验证界面 -->
+    <div id="passwordScreen" class="password-screen">
+        <div class="password-container">
+            <h2>🔐 同人Tag关系查询系统</h2>
+            <p style="color: #666; margin-bottom: 30px;">请输入访问密码</p>
+            <input 
+                type="password" 
+                id="passwordInput" 
+                class="password-input" 
+                placeholder="请输入密码..."
+                autocomplete="off"
+            >
+            <button id="passwordBtn" class="password-btn">进入系统</button>
+            <div id="passwordError" class="password-error"></div>
+            <p style="margin-top: 20px; font-size: 0.8rem; color: #95a5a6;">
+                提示：按Enter键可快速提交
+            </p>
+        </div>
+    </div>
+    
+    <!-- 主内容（初始隐藏） -->
+    <div id="mainContent" class="main-content">
+        <div class="container">
+            <header>
+                <h1>同人Tag关系查询系统</h1>
+                <p class="subtitle">快速查找组合名、代号及其关系</p>
+            </header>
+            
+            <div class="search-section">
+                <div class="search-box">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="请输入组合名或代号进行搜索..."
+                        autocomplete="off"
+                    >
+                    <button id="searchBtn">搜索</button>
+                </div>
+                <div class="info">
+                    💡 提示：您可以通过组合名（如"EXIT"）或代号（如"椪椪"）进行搜索，搜索结果中的匹配项会高亮显示。
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <div id="resultsContainer">
+                    <div class="no-results">
+                        🔍 输入关键词开始搜索
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <span id="statusText">就绪 - 输入搜索内容并按回车</span>
+            </div>
+            
+            <footer>
+                <p>数据来源: 同人tag关系-测试1【处理后】.xlsx | 共 155 条记录</p>
+            </footer>
+        </div>
+    </div>
+    
+    <script>
+        // 密码验证逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordScreen = document.getElementById('passwordScreen');
+            const mainContent = document.getElementById('mainContent');
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordBtn = document.getElementById('passwordBtn');
+            const passwordError = document.getElementById('passwordError');
+            
+            const CORRECT_PASSWORD = 'noka233whale';
+            
+            // 检查是否已通过验证
+            if (localStorage.getItem('tagSystemAuthenticated') === 'true') {
+                passwordScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+            }
+            
+            // 验证密码函数
+            function verifyPassword() {
+                const inputPassword = passwordInput.value.trim();
+                
+                if (inputPassword === CORRECT_PASSWORD) {
+                    // 密码正确
+                    localStorage.setItem('tagSystemAuthenticated', 'true');
+                    passwordScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        passwordScreen.style.display = 'none';
+                        mainContent.style.display = 'block';
+                    }, 300);
+                } else {
+                    // 密码错误
+                    passwordError.textContent = '密码错误，请重新输入';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                    
+                    // 添加抖动效果
+                    passwordInput.style.animation = 'none';
+                    setTimeout(() => {
+                        passwordInput.style.animation = 'shake 0.5s ease-in-out';
+                    }, 10);
+                }
+            }
+            
+            // 添加抖动动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 事件监听
+            passwordBtn.addEventListener('click', verifyPassword);
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    verifyPassword();
+                }
+            });
+            
+            // 初始聚焦
+            passwordInput.focus();
+        });
+        
+        // 原有数据
+        const tagData = [{"组合名": "EXIT", "代号": "椪椪,鐘鈴,鈴鐘,出口", "备注": "这里是备注这里是备注"}, {"组合名": "FUJIWARA", "代号": "富士原", "备注": ""}, {"组合名": "GAG", "代号": "字絵字", "备注": "这里也是备注备注啊备注"}, {"组合名": "LLR", "代号": "左左右", "备注": ""}, {"组合名": "NON STYLE", "代号": "無形,白粋,白イキ,粋白", "备注": "kk是超级大笨蛋"}, {"组合名": "POISON GIRL BAND", "代号": "毒少女", "备注": ""}, {"组合名": "U字工事", "代号": "湯字小路,英字小路", "备注": ""}, {"组合名": "爆笑問題", "代号": "漠紋", "备注": ""}, {"组合名": "爆ノ介", "代号": "獏", "备注": ""}, {"组合名": "博多华丸大吉", "代号": "伯方,代花,花代", "备注": "kk是超级无敌极巨化大笨蛋"}, {"组合名": "超新塾", "代号": "蝶新宿", "备注": ""}, {"组合名": "磁石", "代号": "地尺", "备注": ""}, {"组合名": "次長課長", "代号": "役職", "备注": ""}, {"组合名": "東京03", "代号": "零三,零参,首都", "备注": ""}, {"组合名": "風藤松原", "代号": "封末", "备注": ""}, {"组合名": "宫下草薙", "代号": "看柳", "备注": ""}, {"组合名": "和牛", "代号": "倭牛,驚抱", "备注": ""}, {"组合名": "見取り図", "代号": "碧印刷,見取図,看取図,看取頭", "备注": ""}, {"组合名": "金時", "代号": "元禁鴇,近刻", "备注": ""}, {"组合名": "金属バット", "代号": "勤続,金属棒,勤続鈍器", "备注": ""}, {"组合名": "錦鯉", "代号": "36鱗,西木恋,36urk,西鬼来", "备注": ""}, {"组合名": "井下好井", "代号": "＃#", "备注": ""}, {"组合名": "令和ロマン", "代号": "元号呂万,元槍,令呂", "备注": ""}, {"组合名": "流れ星☆", "代号": "☆三,☆彡,流星", "备注": ""}, {"组合名": "南海キャンディーズ", "代号": "難解飴", "备注": ""}, {"组合名": "平成ノブシコブシ", "代号": "野武士", "备注": ""}, {"组合名": "麒麟", "代号": "首長,低玄", "备注": ""}, {"组合名": "麒麟川島", "代号": "首長低音", "备注": ""}, {"组合名": "千鳥", "代号": "鵆,知鶏", "备注": ""}, {"组合名": "千原兄弟", "代号": "地腹,地原,知腹兄弟", "备注": ""}, {"组合名": "犬の心", "代号": "戌心,戌,犬心", "备注": ""}, {"组合名": "三拍子", "代号": "和太鼓,参表紙", "备注": ""}, {"组合名": "三浦マイルド", "代号": "murMILD×a", "备注": ""}, {"组合名": "三四郎", "代号": "参白,△白", "备注": ""}, {"组合名": "設楽統", "代号": "ドS,036", "备注": ""}, {"组合名": "霜降り明星", "代号": "下振,不知火", "备注": ""}, {"组合名": "四千頭身", "代号": "4khh", "备注": ""}, {"组合名": "天竺鼠", "代号": "点轴", "备注": ""}, {"组合名": "囲碁将棋", "代号": "室内遊戯,対局", "备注": ""}, {"组合名": "相席スタート", "代号": "愛跡開始,合席", "备注": ""}, {"组合名": "野性爆弾", "代号": "矢獏", "备注": ""}, {"组合名": "銀シャリ", "代号": "銀飯", "备注": ""}, {"组合名": "有吉弘行", "代号": "毒舌,毒舌王", "备注": ""}, {"组合名": "雨上がり決死隊", "代号": "飴上", "备注": ""}, {"组合名": "中川家", "代号": "N家", "备注": ""}, {"组合名": "中山 功太", "代号": "凹光,枠外のみ　三文鱼腩kb", "备注": ""}, {"组合名": "アインシュタイン", "代号": "偉人", "备注": ""}, {"组合名": "アインシュタイン", "代号": "虹星", "备注": ""}, {"组合名": "アキナ", "代号": "筆絵,秋名", "备注": ""}, {"组合名": "アルコ&ピース", "代号": "酒平和,酔鳩", "备注": ""}, {"组合名": "アルファルファ", "代号": "α", "备注": ""}, {"组合名": "アンガールズ", "代号": "否少女", "备注": ""}, {"组合名": "アンジャッシュ", "代号": "案邪", "备注": ""}, {"组合名": "アンタッチャブル", "代号": "不可触,不可觸,茶部", "备注": ""}, {"组合名": "インディアンズ", "代号": "先住民", "备注": ""}, {"组合名": "インパルス", "代号": "衝撃,印派,印波", "备注": ""}, {"组合名": "ウーマンラッシュアワー", "代号": "女性混雑,女性混雑時", "备注": ""}, {"组合名": "ウエストランド", "代号": "西国", "备注": ""}, {"组合名": "ウッチャンナンチャン", "代号": "雲南", "备注": ""}, {"组合名": "エリートヤンキー", "代号": "優秀不良,優良不良", "备注": ""}, {"组合名": "エルシャラカーニ", "代号": "穴堀", "备注": ""}, {"组合名": "オードリー", "代号": "大鳥", "备注": ""}, {"组合名": "おいでやすこが", "代号": "甥個我,一揃", "备注": ""}, {"组合名": "おぎやはぎ", "代号": "荻萩", "备注": ""}, {"组合名": "オジンオズボーン", "代号": "叔父小津", "备注": ""}, {"组合名": "おぼん・こぼん", "代号": "大盆小盆", "备注": ""}, {"组合名": "オリエンタルラジオ", "代号": "東洋,東洋音箱,東洋魚", "备注": ""}, {"组合名": "カナリア", "代号": "金糸雀", "备注": ""}, {"组合名": "かまいたち", "代号": "釜井達,鎌鼬,釜痛血", "备注": ""}, {"组合名": "カミナリ", "代号": "神鳴,雷", "备注": ""}, {"组合名": "かもめんたる", "代号": "鴎心,鴎,鴨精神", "备注": ""}, {"组合名": "ガクテンソク", "代号": "楽典", "备注": ""}, {"组合名": "ガスマスクガール", "代号": "元防毒少女", "备注": ""}, {"组合名": "きつね", "代号": "犭瓜,狐", "备注": ""}, {"组合名": "キングオブコメディ", "代号": "金米", "备注": ""}, {"组合名": "グランジ", "代号": "具欄児", "备注": ""}, {"组合名": "ココリコ", "代号": "此処利己,ccrc", "备注": ""}, {"组合名": "コマンダンテ", "代号": "司令官", "备注": ""}, {"组合名": "さまぁ〜ず", "代号": "夏達,夏家,夏夏,夏ず", "备注": ""}, {"组合名": "さらば青春の光", "代号": "去青", "备注": ""}, {"组合名": "サルゴリラ", "代号": "霊長類,申五里羅", "备注": ""}, {"组合名": "サンドウィッチマン", "代号": "三度", "备注": ""}, {"组合名": "ザ・ギース", "代号": "鵞鳥", "备注": ""}, {"组合名": "ザ・プラン9", "代号": "第九計画,計画,計画9", "备注": ""}, {"组合名": "ザ・ぼんち", "代号": "盆地", "备注": ""}, {"组合名": "しずる", "代号": "静流", "备注": ""}, {"组合名": "シソンヌ", "代号": "紫蘇", "备注": ""}, {"组合名": "シャンプーハット", "代号": "洗髪帽子", "备注": ""}, {"组合名": "ジェラードン", "代号": "地偉丼", "备注": ""}, {"组合名": "ジグザグジギー", "代号": "治具", "备注": ""}, {"组合名": "ジャルジャル", "代号": "邪流", "备注": ""}, {"组合名": "ジャングルポケット", "代号": "密林", "备注": ""}, {"组合名": "ジューシーズ", "代号": "果汁達", "备注": ""}, {"组合名": "スーパーマラドーナ", "代号": "超真羅,右挽肉,超摩羅", "备注": ""}, {"组合名": "すえひろがりず", "代号": "据広,拍手,八s", "备注": ""}, {"组合名": "スピードワゴン", "代号": "高速台車,速度台車,速度", "备注": ""}, {"组合名": "セイシュン・ダーツ", "代号": "元若矢投", "备注": ""}, {"组合名": "タイムマシーン3号", "代号": "時間機械,時間機械3,時間機械三", "备注": ""}, {"组合名": "タモンズ", "代号": "多聞図", "备注": ""}, {"组合名": "ダーリンハニー", "代号": "啓示", "备注": ""}, {"组合名": "ダイアン", "代号": "代案", "备注": ""}, {"组合名": "ダイノジ", "代号": "大の字", "备注": ""}, {"组合名": "ダウンタウン", "代号": "下町", "备注": ""}, {"组合名": "ダウンタウン", "代号": "下町", "备注": ""}, {"组合名": "チュートリアル", "代号": "中途,中途現実", "备注": ""}, {"组合名": "チョコレートプラネット", "代号": "甘惑星,菓子惑星", "备注": ""}, {"组合名": "ちょんまげラーメン", "代号": "丁髷拉麺", "备注": ""}, {"组合名": "ツーナッカン", "代号": "鮪缶", "备注": ""}, {"组合名": "ティモンディ", "代号": "提門,TMD", "备注": ""}, {"组合名": "テンダラー", "代号": "十弗", "备注": ""}, {"组合名": "トット", "代号": "窓際,朝猫,w緑", "备注": ""}, {"组合名": "トップリード", "代号": "先綱", "备注": ""}, {"组合名": "トム・ブラウン", "代号": "富茶", "备注": ""}, {"组合名": "とろサーモン", "代号": "脂鮭", "备注": ""}, {"组合名": "とんねるず", "代号": "TN,T×N,豚寝図", "备注": ""}, {"组合名": "ドランクドラゴン", "代号": "酔竜,酔龍", "备注": ""}, {"组合名": "ナイツ", "代号": "騎士", "备注": ""}, {"组合名": "なすなかにし", "代号": "茄子仲,茄仲,那須中", "备注": ""}, {"组合名": "ななまがり", "代号": "七勾,架空人", "备注": ""}, {"组合名": "なにわプラッチック", "代号": "浪速樹脂", "备注": ""}, {"组合名": "ニューヨーク", "代号": "不眠街,米国都市", "备注": ""}, {"组合名": "ネプチューン", "代号": "海王星", "备注": ""}, {"组合名": "ハライチ", "代号": "原市", "备注": ""}, {"组合名": "ハライチ", "代号": "腹市,腹位置,腹一,腹壱,原市,原一", "备注": ""}, {"组合名": "はんにゃ", "代号": "般若", "备注": ""}, {"组合名": "バイきんぐ", "代号": "倍斤具", "备注": ""}, {"组合名": "バカリズム", "代号": "馬鹿律動", "备注": ""}, {"组合名": "バナナマン", "代号": "877", "备注": ""}, {"组合名": "パンサー", "代号": "豹,黒豹", "备注": ""}, {"组合名": "フットボールアワー", "代号": "蹴球時間,蹴球,蹴玉", "备注": ""}, {"组合名": "フルーツポンチ", "代号": "果実", "备注": ""}, {"组合名": "ブラックパイナーSOS", "代号": "救難信号", "备注": ""}, {"组合名": "ブラックマヨネーズ", "代号": "黑奶,黒迷,黒調味料", "备注": ""}, {"组合名": "ブロードキャスト!!", "代号": "放送", "备注": ""}, {"组合名": "ヘンダーソン", "代号": "変駄,辺田村", "备注": ""}, {"组合名": "ぺこぱ", "代号": "腹減,凹派,凹羽,凸派", "备注": ""}, {"组合名": "ペンギンズ", "代号": "筆銀’s,片吟s,片吟’s", "备注": ""}, {"组合名": "マシンガンズ", "代号": "銃達,機関銃達,機関銃", "备注": ""}, {"组合名": "マヂカルラブリー", "代号": "魔法愛,魔法可憐,笑獲", "备注": ""}, {"组合名": "ミルクボーイ", "代号": "牛乳少年", "备注": ""}, {"组合名": "メイプル超合金", "代号": "楓超,楓超合金,楓金", "备注": ""}, {"组合名": "ヤング", "代号": "若人", "备注": ""}, {"组合名": "ゆったり感", "代号": "緩感", "备注": ""}, {"组合名": "よゐこ", "代号": "良子,宵子", "备注": ""}, {"组合名": "ラーメンズ", "代号": "ラのつく,ラ,箱職人,麺,麺図,拉麺図", "备注": ""}, {"组合名": "ライス", "代号": "米飯,お米,米", "备注": ""}, {"组合名": "ライセンス", "代号": "免許", "备注": ""}, {"组合名": "ラバーガール", "代号": "樹脂少女", "备注": ""}, {"组合名": "ラフ・コントロール", "代号": "笑操作,右元極", "备注": ""}, {"组合名": "ラブレターズ", "代号": "恋文s", "备注": ""}, {"组合名": "ランジャタイ", "代号": "香木,蘭奢待", "备注": ""}, {"组合名": "リニア", "代号": "直線,電磁特急", "备注": ""}, {"组合名": "レンディエンジェル", "代号": "潮天使,時尚天使", "备注": ""}, {"组合名": "ロザン", "代号": "廬山,高学歴,京府,府京", "备注": ""}, {"组合名": "ロンドンブーツ1号2号", "代号": "論部,倫敦长靴,英国長靴", "备注": ""}];
+        
+        // 原有搜索功能（保持不变）
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const statusText = document.getElementById('statusText');
+            
+            // 搜索函数
+            function performSearch() {
+                const keyword = searchInput.value.trim();
+                
+                if (!keyword) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-results">
+                            🔍 请输入搜索关键词
+                        </div>
+                    `;
+                    statusText.textContent = '就绪 - 请输入搜索内容';
+                    return;
+                }
+                
+                // 执行搜索
+                const results = [];
+                const keywordLower = keyword.toLowerCase();
+                
+                // 搜索组合名
+                tagData.forEach(item => {
+                    if (item['组合名'].toLowerCase().includes(keywordLower)) {
+                        results.push({
+                            type: 'combo',
+                            data: item,
+                            matchField: '组合名'
+                        });
+                    }
+                });
+                
+                // 搜索代号
+                tagData.forEach(item => {
+                    if (item['代号'].toLowerCase().includes(keywordLower)) {
+                        // 检查是否已添加（避免重复）
+                        if (!results.some(r => r.data['组合名'] === item['组合名'])) {
+                            results.push({
+                                type: 'code',
+                                data: item,
+                                matchField: '代号'
+                            });
+                        }
+                    }
+                });
+                
+                // 显示结果
+                displayResults(results, keyword);
+            }
+            
+            // 显示结果
+            function displayResults(results, keyword) {
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="no-results">
+                            😔 未找到与 "<strong>${keyword}</strong>" 相关的结果
+                        </div>
+                    `;
+                    statusText.textContent = `未找到与 "${keyword}" 相关的结果`;
+                    return;
+                }
+                
+                let resultsHTML = '';
+                
+                results.forEach((result, index) => {
+                    if (index > 0) {
+                        resultsHTML += '<div class="divider"></div>';
+                    }
+                    
+                    const item = result.data;
+                    const comboName = highlightText(item['组合名'], keyword, result.matchField === '组合名');
+                    const codes = highlightText(item['代号'], keyword, result.matchField === '代号');
+                    const remark = item['备注'] || '（无）';
+                    
+                    resultsHTML += `
+                        <div class="result-item">
+                            <div class="result-header">
+                                <div class="combo-name">${comboName}</div>
+                                <div class="match-type">${result.type === 'combo' ? '组合名匹配' : '代号匹配'}</div>
+                            </div>
+                            <div class="codes">
+                                <strong>代号:</strong> ${codes}
+                            </div>
+                            <div class="remark">
+                                <strong>备注:</strong> ${remark}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                resultsContainer.innerHTML = resultsHTML;
+                statusText.textContent = `找到 ${results.length} 条与 "${keyword}" 相关的结果`;
+            }
+            
+            // 高亮显示文本
+            function highlightText(text, keyword, shouldHighlight) {
+                if (!shouldHighlight || !keyword) {
+                    return text;
+                }
+                
+                const regex = new RegExp(`(${escapeRegExp(keyword)})`, 'gi');
+                return text.replace(regex, '<span class="highlight">$1</span>');
+            }
+            
+            // 转义正则表达式特殊字符
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+            
+            // 事件监听
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // 初始状态
+            statusText.textContent = `就绪 - 共 ${tagData.length} 条记录`;
+        });
+    </script>
+</body>
+</html>
